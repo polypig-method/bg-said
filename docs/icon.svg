@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0f1412"/>
+  <rect x="112" y="350" width="52" height="70" rx="9" fill="#2a3a33"/>
+  <rect x="188" y="320" width="52" height="100" rx="9" fill="#2a3a33"/>
+  <rect x="264" y="290" width="52" height="130" rx="9" fill="#2a3a33"/>
+  <rect x="340" y="256" width="52" height="164" rx="9" fill="#5fd39b"/>
+  <text x="256" y="226" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="800" font-size="160" fill="#ece8de" letter-spacing="-6">BG</text>
+  <path d="M112 448h280" stroke="#d9b45a" stroke-width="12" stroke-linecap="round"/>
+</svg>

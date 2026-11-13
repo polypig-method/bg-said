@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BG Said</title>
+<meta name="description" content="สแกนหุ้น S&P 500 ด้วยสูตร Benjamin Graham ทุกวันหลังตลาดปิด">
+<meta name="theme-color" content="#0f1412">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BG Said">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="mark">BG</span><span class="said">Said</span>
+  </div>
+  <div class="meta" id="meta">กำลังโหลด…</div>
+</header>
+
+<main>
+  <!-- TODAY -->
+  <section class="view" id="v-today">
+    <div class="quote">
+      <p><em>Graham said</em> 5 ตัวนี้น่าศึกษา</p>
+      <span>หุ้น S&amp;P 500 ที่ราคาต่ำกว่ามูลค่าตามสูตรมากที่สุด และผ่านเกณฑ์คุณภาพ · ไม่ใช่คำแนะนำซื้อขาย</span>
+    </div>
+    <div id="top5" class="cards"></div>
+    <div class="formula-strip" id="formulaStrip"></div>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <!-- ALL -->
+  <section class="view" id="v-all" hidden>
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="ค้นหา ticker หรือชื่อบริษัท" autocomplete="off">
+      <select id="sector"><option value="">ทุกกลุ่ม</option></select>
+      <select id="qual">
+        <option value="0">คุณภาพทั้งหมด</option>
+        <option value="3">≥ 3/6</option>
+        <option value="4" selected>≥ 4/6</option>
+        <option value="5">≥ 5/6</option>
+      </select>
+    </div>
+    <div class="tablewrap">
+      <table id="tbl">
+        <thead><tr>
+          <th data-k="sym">หุ้น</th>
+          <th data-k="mos" class="num">MOS</th>
+          <th data-k="price" class="num">ราคา</th>
+          <th data-k="value" class="num">มูลค่า</th>
+          <th data-k="g" class="num">g%</th>
+          <th data-k="pe" class="num">P/E</th>
+          <th data-k="quality" class="num">Q</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="hint" id="allCount"></p>
+  </section>
+
+  <!-- LAB -->
+  <section class="view" id="v-lab" hidden>
+    <h2>ปรับสูตรเอง</h2>
+    <p class="hint">เปลี่ยนสมมติฐานแล้วดูว่า Top 5 เปลี่ยนไปอย่างไร (คำนวณในเครื่องคุณ ไม่กระทบการแจ้งเตือน)</p>
+    <div class="lab">
+      <label>เพดานการเติบโต g <output id="o-gmax"></output>
+        <input type="range" id="gmax" min="5" max="25" step="1"></label>
+      <label>ผลตอบแทนหุ้นกู้ AAA (Y) <output id="o-y"></output>
+        <input type="range" id="yv" min="2" max="10" step="0.05"></label>
+      <label>P/E พื้นฐานของหุ้นไม่โต <output id="o-base"></output>
+        <input type="range" id="base" min="6" max="12" step="0.5"></label>
+      <label>คะแนนคุณภาพขั้นต่ำ <output id="o-minq"></output>
+        <input type="range" id="minq" min="0" max="6" step="1"></label>
+      <label class="row"><input type="checkbox" id="useFwd" checked> ใช้การเติบโตคาดการณ์ปีหน้าร่วมด้วย</label>
+      <button id="reset" class="ghost">คืนค่าตั้งต้น</button>
+    </div>
+    <div id="labTop" class="cards compact"></div>
+  </section>
+
+  <!-- HISTORY -->
+  <section class="view" id="v-hist" hidden>
+    <h2>ย้อนหลัง</h2>
+    <p class="hint">Top 5 ของแต่ละวันทำการ · ตัวเลขคือ Margin of Safety ณ วันนั้น</p>
+    <div id="hist"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="view" id="v-about" hidden>
+    <h2>สูตรทำงานอย่างไร</h2>
+    <div class="eq">V = EPS × (8.5 + 2g) × 4.4 ÷ Y</div>
+    <dl class="defs">
+      <dt>EPS</dt><dd>กำไรต่อหุ้น 12 เดือนล่าสุด (diluted)</dd>
+      <dt>8.5</dt><dd>P/E ที่ Graham ให้กับบริษัทที่ไม่เติบโตเลย</dd>
+      <dt>g</dt><dd>อัตราเติบโตที่คาด (%) = ค่าที่ <b>ต่ำกว่า</b> ระหว่าง EPS CAGR ย้อนหลัง ~4 ปี กับการเติบโต EPS คาดการณ์ปีหน้า (อนุรักษ์นิยมแบบ Graham) จำกัดไว้ 0–15%</dd>
+      <dt>4.4</dt><dd>ผลตอบแทนหุ้นกู้ AAA ในปี 1962 ที่ Graham ใช้ตั้งสูตร</dd>
+      <dt>Y</dt><dd>ผลตอบแทนหุ้นกู้ Moody's AAA วันนี้ (FRED: DAAA) — ดอกเบี้ยสูง มูลค่าหุ้นยิ่งต่ำ</dd>
+      <dt>MOS</dt><dd>Margin of Safety = (V − ราคา) ÷ V ยิ่งสูงยิ่งถูกกว่ามูลค่าตามสูตร</dd>
+    </dl>
+    <h3>เกณฑ์คุณภาพ 6 ข้อ (จาก “Defensive Investor”)</h3>
+    <ol class="checks-doc">
+      <li><b>กำไรสม่ำเสมอ</b> — EPS เป็นบวกทุกปีที่มีข้อมูล (บังคับสำหรับ Top 5)</li>
+      <li><b>สภาพคล่อง</b> — Current ratio ≥ 1.5</li>
+      <li><b>หนี้</b> — Debt/Equity ≤ 1.0</li>
+      <li><b>ปันผล</b> — จ่ายปันผลอยู่</li>
+      <li><b>P/E ≤ 15</b></li>
+      <li><b>P/E × P/B ≤ 22.5</b> — กติกาเดียวกับ Graham Number</li>
+    </ol>
+    <p class="hint">กลุ่มการเงิน อสังหาฯ และสาธารณูปโภค ไม่วัดข้อ 2–3 (นับว่าผ่าน) เพราะโครงสร้างงบต่างจากธุรกิจทั่วไป</p>
+    <p class="hint">Top 5 = หุ้นที่ EPS บวกสม่ำเสมอ คุณภาพ ≥ 4/6 แล้วเรียงตาม MOS สูงสุด ไม่เกิน 2 ตัวต่อกลุ่มอุตสาหกรรม ตัด MOS เกิน 85% ออก (มักเป็นข้อมูลผิดปกติ)</p>
+
+    <h2>แจ้งเตือนในมือถือ</h2>
+    <ol class="steps">
+      <li>ติดตั้งแอป <b>ntfy</b> (App Store / Google Play)</li>
+      <li>กด <b>+</b> แล้วใส่ชื่อหัวข้อที่ได้รับตอนติดตั้ง (เก็บเป็นความลับ)</li>
+      <li>ทุกวันทำการ ราว 05:00–06:00 น. เวลาไทย จะได้รับ Top 5 แตะแจ้งเตือนเพื่อเปิดหน้านี้</li>
+    </ol>
+    <h2>ติดตั้งเป็นแอป</h2>
+    <p class="hint">iPhone: Safari → แชร์ → “เพิ่มไปยังหน้าจอโฮม” · Android: Chrome → ⋮ → “ติดตั้งแอป”</p>
+
+    <p class="disclaimer">BG Said เป็นเครื่องมือคัดกรองเพื่อการศึกษา ใช้ข้อมูลจาก Yahoo Finance และ FRED ซึ่งอาจล่าช้าหรือคลาดเคลื่อน สูตร Graham เป็นจุดเริ่มต้นของการวิเคราะห์ ไม่ใช่คำแนะนำการลงทุน ควรอ่านงบการเงินจริงก่อนตัดสินใจทุกครั้ง</p>
+    <p class="hint" id="src"></p>
+  </section>
+</main>
+
+<nav class="tabs">
+  <button data-v="today" class="on"><svg viewBox="0 0 24 24"><path d="M4 19V9m6 10V5m6 14v-7m4 7H2"/></svg>วันนี้</button>
+  <button data-v="all"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>ทั้งหมด</button>
+  <button data-v="lab"><svg viewBox="0 0 24 24"><path d="M5 7h9m4 0h1M5 17h3m4 0h7M14 4v6M8 14v6"/></svg>ปรับสูตร</button>
+  <button data-v="hist"><svg viewBox="0 0 24 24"><path d="M12 7v5l3 2M3 12a9 9 0 1 0 3-6.7M3 4v4h4"/></svg>ย้อนหลัง</button>
+  <button data-v="about"><svg viewBox="0 0 24 24"><path d="M12 11v6m0-10v.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>สูตร</button>
+</nav>
+
+<dialog id="sheet"><div id="sheetBody"></div></dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
