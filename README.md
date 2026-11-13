@@ -44,3 +44,9 @@ NTFY_TOPIC=<topic> .venv/bin/python engine/bgsaid.py --force   # ส่งแจ
 ติดตั้งแอป ntfy → กด + → ใส่ topic จาก `PRIVATE.md` (ใช้เซิร์ฟเวอร์ ntfy.sh) ถ้ารอบไหนรันไม่สำเร็จ จะมีแจ้งเตือน "BG Said update failed" ส่งมาที่ topic เดียวกัน
 
 > BG Said เป็นเครื่องมือคัดกรองหุ้นเพื่อการศึกษาเท่านั้น ไม่ใช่คำแนะนำการลงทุน
+
+## แอป Mac
+`mac/Sources/main.swift` เป็นหน้าต่างแบบ native (AppKit + WKWebView) ที่เปิดเว็บ BG Said ตัวจริง ถ้าออฟไลน์จะใช้สำเนาที่ฝังไว้ในแอปแทน และขณะที่แอปเปิดอยู่ จะแจ้งเตือนบน macOS เมื่อมี Top 5 ของวันใหม่
+```bash
+./mac/build.sh 1.0      # → BG Said.dmg (ใช้แค่ Command Line Tools ไม่ต้องมี Xcode)
+```
